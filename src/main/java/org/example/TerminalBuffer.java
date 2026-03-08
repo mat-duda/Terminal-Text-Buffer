@@ -8,7 +8,7 @@ public class TerminalBuffer {
     private int height;
     private int maxScrollbackLines;
     private List<Lines> activeScreen = new ArrayList<>();
-    private int currentForegroundColor = 0;
+    private int currentForegroundColor = 7;
     private int currentBackgroundColor = 0;
     private boolean isBold = false;
     private boolean isItalic = false;
@@ -37,6 +37,15 @@ public class TerminalBuffer {
         }
 
     }
+
+    public void setCurrentForegroundColor(int currentForegroundColor) {
+        this.currentForegroundColor = currentForegroundColor;
+    }
+
+    public void setCurrentBackgroundColor(int currentBackgroundColor) {
+        this.currentBackgroundColor = currentBackgroundColor;
+    }
+
     public List<Lines> getActiveScreen() {
         return activeScreen;
     }

@@ -2,9 +2,9 @@ package org.example;
 public class Main {
     public static void main(String[] args) {
         TerminalBuffer buffer = new TerminalBuffer();
-        buffer.setup(5,1,5);
+        buffer.setup(2,3,5);
 
-        buffer.setAttributes(1,0,true,false ,false);
+        buffer.setAttributes(3,0,true,true ,true);
         buffer.write("hello");
         buffer.print();
     }

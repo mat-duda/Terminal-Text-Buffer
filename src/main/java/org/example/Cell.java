@@ -24,6 +24,6 @@ public class Cell {
     }
     @Override
     public String toString() {
-        return String.valueOf(character);
-    }
+        String style = TextColor.setColor(foreGroundColor, backgroundColor, bold,italic,underline);
+        return style + character + TextColor.RESET;    }
 }
