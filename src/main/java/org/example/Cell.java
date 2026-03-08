@@ -22,8 +22,12 @@ public class Cell {
         this.italic = i;
         this.underline = u;
     }
-    @Override
-    public String toString() {
-        String style = TextColor.setColor(foreGroundColor, backgroundColor, bold,italic,underline);
-        return style + character + TextColor.RESET;    }
-}
+
+
+    public String render(boolean isCursor) {
+        int fg = isCursor ? backgroundColor : foreGroundColor;
+        int bg = isCursor ? foreGroundColor : backgroundColor;
+
+        String style = TextColor.setColor(fg, bg, bold, italic, underline);
+        return style + character + TextColor.RESET;
+    }}

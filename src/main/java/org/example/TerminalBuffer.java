@@ -38,6 +38,14 @@ public class TerminalBuffer {
 
     }
 
+    public int getCursorX() {
+        return cursorX;
+    }
+
+    public int getCursorY() {
+        return cursorY;
+    }
+
     public void setCurrentForegroundColor(int currentForegroundColor) {
         this.currentForegroundColor = currentForegroundColor;
     }
@@ -63,19 +71,20 @@ public class TerminalBuffer {
             cursorForward();
         }
     }
-    public void cursorForward(){
-        cursorX += 1;
-        if(cursorX >= width){
+    public void cursorForward() {
+        if (cursorX < width - 1) {
+            cursorX += 1;
+        } else if (cursorY < height - 1) {
             cursorX = 0;
             cursorY += 1;
-            if(cursorY >= height){
-                cursorY = height - 1;
-                }
         }
     }
     public void print(){
-        for (Lines line : activeScreen) {
-            System.out.println(line.toString());
+        for (int y = 0; y < activeScreen.size(); y++) {
+            Lines line = activeScreen.get(y);
+            int highlightColumn = (y == cursorY) ? cursorX : -1;
+
+            System.out.println(line.render(highlightColumn));
         }
     }
 }

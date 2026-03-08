@@ -3,27 +3,33 @@ package org.example;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Lines {
     private int width;
     private List<Cell> cells;
-    public Lines(int width){
+
+    public Lines(int width) {
         this.width = width;
         this.cells = new ArrayList<>(width);
-        for(int i = 0; i < width; i++){
+        for (int i = 0; i < width; i++) {
             cells.add(new Cell());
         }
     }
-    public List<Cell> getCells(){
+
+    public List<Cell> getCells() {
         return cells;
     }
-    public Cell getCell(int i){
+
+    public Cell getCell(int i) {
         return cells.get(i);
     }
-    @Override
-    public String toString() {
-        return cells.stream()
-                .map(Cell::toString)
+
+    public String render(int cursorX) {
+        return IntStream.range(0, cells.size())
+                .mapToObj(i -> {
+                    return cells.get(i).render(i == cursorX);
+                })
                 .collect(Collectors.joining(""));
-   }
+    }
 }
