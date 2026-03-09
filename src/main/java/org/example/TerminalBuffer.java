@@ -105,7 +105,9 @@ public class TerminalBuffer {
             int highlightColumn = (y == cursorY) ? cursorX : -1;
 
             System.out.println(line.render(highlightColumn )+TextColor.RESET);
+
         }
+        System.out.println(cursorX +" "+ cursorY );
     }
     public void moveCursor(Directions direction, int n){
         switch (direction){

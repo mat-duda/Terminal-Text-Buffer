@@ -17,15 +17,17 @@ public class Main {
             //buffer.refresh();
             input = scanner.nextLine().toLowerCase();
 
-            if (input.equals("\u001B[A")) {
-                buffer.moveCursor(TerminalBuffer.Directions.UP, 1);
-            } else if (input.equals("\u001B[B")) {
-                buffer.moveCursor(TerminalBuffer.Directions.DOWN, 1);
-            } else if (input.equals("\u001B[D")) {
-                buffer.moveCursor(TerminalBuffer.Directions.LEFT, 1);
-            } else if (input.equals("\u001B[C")) {
-                buffer.moveCursor(TerminalBuffer.Directions.RIGHT, 1);
-            } else  {
+            if (input.startsWith("goto")) {
+                String[] parts = input.split(" ");
+                int x = Integer.parseInt(parts[1]);
+                int y = Integer.parseInt(parts[2]);
+                buffer.setCursor(x, y);
+            } else if (input.startsWith("move")) {
+                String[] parts = input.split(" ");
+                TerminalBuffer.Directions dir = TerminalBuffer.Directions.valueOf(parts[1].toUpperCase());
+                int n = Integer.parseInt(parts[2]);
+                buffer.moveCursor(dir, n);
+            } else {
                 buffer.write(input);
             }
         }
