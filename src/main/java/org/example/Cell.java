@@ -5,7 +5,6 @@ public class Cell {
     int foreGroundColor;
     int backgroundColor;
     boolean bold, italic, underline;
-    public Cell(){}
     public Cell(char character, int foreGroundColor, int backgroundColor, boolean b, boolean i, boolean u) {
         this.character = character;
         this.foreGroundColor = foreGroundColor;

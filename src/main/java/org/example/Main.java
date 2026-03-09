@@ -1,11 +1,31 @@
 package org.example;
+
+import java.util.Scanner;
+
 public class Main {
     public static void main(String[] args) {
         TerminalBuffer buffer = new TerminalBuffer();
-        buffer.setup(5,1,5);
+        buffer.setAttributes(1,6,true,false ,false);
+        buffer.setup(6,3,5);
 
-        buffer.setAttributes(3,0,true,false ,false);
-        buffer.write("hello");
-        buffer.print();
+
+        Scanner scanner = new Scanner(System.in);
+        String input = "";
+
+        while (!input.equals("exit")) {
+            buffer.print();
+            input = scanner.nextLine().toLowerCase();
+            if (input.equals("\u001B[A")) {
+                buffer.moveCursor(TerminalBuffer.Directions.UP, 1);
+            } else if (input.equals("\u001B[B")) {
+                buffer.moveCursor(TerminalBuffer.Directions.DOWN, 1);
+            } else if (input.equals("\u001B[D")) {
+                buffer.moveCursor(TerminalBuffer.Directions.LEFT, 1);
+            } else if (input.equals("\u001B[C")) {
+                buffer.moveCursor(TerminalBuffer.Directions.RIGHT, 1);
+            } else  {
+                buffer.write(input);
+            }
+        }
     }
 }

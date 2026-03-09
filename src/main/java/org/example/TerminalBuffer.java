@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TerminalBuffer {
+    public enum Directions{
+        UP,DOWN,LEFT,RIGHT
+    }
     private int width;
     private int height;
     private int maxScrollbackLines;
     private List<Lines> activeScreen = new ArrayList<>();
-    private int currentForegroundColor = 7;
-    private int currentBackgroundColor = 0;
+    private int currentForegroundColor  ;
+    private int currentBackgroundColor ;
     private boolean isBold = false;
     private boolean isItalic = false;
     private boolean isUnderline = false;
@@ -32,7 +35,7 @@ public class TerminalBuffer {
         this.activeScreen = new ArrayList<>(height);
 
         for(int i = 0; i < height; i++){
-            activeScreen.add(new Lines(width));
+            activeScreen.add(new Lines(width,this.currentBackgroundColor));
 
         }
 
@@ -84,7 +87,20 @@ public class TerminalBuffer {
             Lines line = activeScreen.get(y);
             int highlightColumn = (y == cursorY) ? cursorX : -1;
 
-            System.out.println(line.render(highlightColumn));
+            System.out.println(line.render(highlightColumn )+TextColor.RESET);
         }
+    }
+    public void moveCursor(Directions direction, int n){
+        switch (direction){
+            case UP -> cursorY = Math.max(0, cursorY - n);
+            case DOWN -> cursorY = Math.min(height - 1, cursorY + n);
+            case LEFT -> cursorX = Math.max(0, cursorX - n);
+            case RIGHT -> cursorX = Math.min(width - 1, cursorX + n);
+        }
+
+    }
+    public void setCursor(int x, int y) {
+        this.cursorX = Math.max(0, Math.min(x, width - 1));
+        this.cursorY = Math.max(0, Math.min(y, height - 1));
     }
 }

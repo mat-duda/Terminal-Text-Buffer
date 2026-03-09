@@ -9,11 +9,11 @@ public class Lines {
     private int width;
     private List<Cell> cells;
 
-    public Lines(int width) {
+    public Lines(int width, int defaultBackgroundColor) {
         this.width = width;
         this.cells = new ArrayList<>(width);
         for (int i = 0; i < width; i++) {
-            cells.add(new Cell());
+            cells.add(new Cell(' ',7,defaultBackgroundColor,false,false,false));
         }
     }
 
