@@ -118,6 +118,13 @@ public class TerminalBuffer {
         }
 
     }
+    public void fillLine(int lineNumber, char character){
+        Lines lineToChange = activeScreen.get(lineNumber);
+
+        for (Cell cell : lineToChange.getCells()) {
+            cell.update(character, currentForegroundColor, currentBackgroundColor, isBold, isItalic, isUnderline);
+        }
+    }
     public void setCursor(int x, int y) {
         this.cursorX = Math.max(0, Math.min(x, width - 1));
         this.cursorY = Math.max(0, Math.min(y, height - 1));

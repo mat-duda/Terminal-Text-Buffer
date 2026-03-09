@@ -27,7 +27,28 @@ public class Main {
                 TerminalBuffer.Directions dir = TerminalBuffer.Directions.valueOf(parts[1].toUpperCase());
                 int n = Integer.parseInt(parts[2]);
                 buffer.moveCursor(dir, n);
-            } else {
+            }
+            else if (input.startsWith("fill")) {
+                String[] parts = input.split(" ");
+                int lineNumber = Integer.parseInt(parts[1]);
+                char character = ' ';
+                if (parts.length >= 3 && !parts[2].isEmpty()) {
+                    character = parts[2].charAt(0);
+                }
+                buffer.fillLine(lineNumber,character);
+
+            }
+            //TODO: BELOW
+            else if (input.startsWith("insert")) {}
+            else if (input.startsWith("clear")) {}
+            else if (input.startsWith("clearall")) {}
+            else if (input.startsWith("getcharat")) {}
+            else if (input.startsWith("getattat")) {}
+            else if (input.startsWith("getline")) {}
+            else if (input.startsWith("getscreen")) {}
+            else if (input.startsWith("getscreenandscroll")) {}
+            //---------------------
+            else {
                 buffer.write(input);
             }
         }
