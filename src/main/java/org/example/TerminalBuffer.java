@@ -47,12 +47,16 @@ public class TerminalBuffer {
         return cursorX;
     }
     private void pushLinesToInactiveScreen() {
-        Lines topLine = activeScreen.removeFirst();
+        if (activeScreen.isEmpty()) return;
+
+        Lines topLine = activeScreen.remove(0);
         inactiveScreen.add(topLine);
-        if(inactiveScreen.size() > maxScrollbackLines){
-            inactiveScreen.removeFirst();
+
+        if (inactiveScreen.size() > maxScrollbackLines) {
+            inactiveScreen.remove(0);
         }
-        activeScreen.add(new Lines(width, this.currentBackgroundColor));    }
+        activeScreen.add(new Lines(width, this.currentBackgroundColor));
+    }
     public int getCursorY() {
         return cursorY;
     }
@@ -83,7 +87,6 @@ public class TerminalBuffer {
         }
     }
     public void cursorForward() {
-        System.out.println(inactiveScreen.toString());
         if (cursorX < width - 1) {
             cursorX += 1;
         } else {
@@ -97,6 +100,7 @@ public class TerminalBuffer {
     }
 
     public void print(){
+        System.out.println(inactiveScreen.toString());
         System.out.print("\033[H\033[2J");
 
         System.out.flush();
@@ -118,12 +122,36 @@ public class TerminalBuffer {
         }
 
     }
-    public void fillLine(int lineNumber, char character){
-        Lines lineToChange = activeScreen.get(lineNumber);
+    public void fillLine(char character){
+        Lines lineToChange = activeScreen.get(cursorY);
 
         for (Cell cell : lineToChange.getCells()) {
             cell.update(character, currentForegroundColor, currentBackgroundColor, isBold, isItalic, isUnderline);
         }
+    }
+
+    public void clearAll(){
+        for (Lines line : activeScreen) {
+            line.clear();
+        }
+        for (Lines line : inactiveScreen) {
+            line.clear();
+        }
+        inactiveScreen.clear();
+        cursorX = 0;
+        cursorY = 0;
+    }
+    public int getCurrentBackgroundColor() {
+        return currentBackgroundColor;
+    }
+
+    public List<Lines> getInactiveScreen() {
+        return inactiveScreen;
+    }
+
+    public void insert(String text){
+        Lines currentLine = activeScreen.get(cursorY);
+            //currentLine.insertCell()
     }
     public void setCursor(int x, int y) {
         this.cursorX = Math.max(0, Math.min(x, width - 1));

@@ -29,24 +29,28 @@ public class Main {
                 buffer.moveCursor(dir, n);
             }
             else if (input.startsWith("fill")) {
-                String[] parts = input.split(" ");
-                int lineNumber = Integer.parseInt(parts[1]);
-                char character = ' ';
-                if (parts.length >= 3 && !parts[2].isEmpty()) {
-                    character = parts[2].charAt(0);
-                }
-                buffer.fillLine(lineNumber,character);
+                char character = input.split(" ")[1].charAt(0);
+                buffer.fillLine(character);
+            }
+            else if (input.startsWith("insert")) {
+                String text = input.substring(7);
+                buffer.insert(text);
+            }
+            else if (input.startsWith("clearall")) {
+
+                buffer.clearAll();
 
             }
+            else if (input.startsWith("clear")) {
+                for(Lines lines: buffer.getActiveScreen())
+                    lines.clear();
+            }
             //TODO: BELOW
-            else if (input.startsWith("insert")) {}
-            else if (input.startsWith("clear")) {}
-            else if (input.startsWith("clearall")) {}
             else if (input.startsWith("getcharat")) {}
             else if (input.startsWith("getattat")) {}
             else if (input.startsWith("getline")) {}
-            else if (input.startsWith("getscreen")) {}
             else if (input.startsWith("getscreenandscroll")) {}
+            else if (input.startsWith("getscreen")) {}
             //---------------------
             else {
                 buffer.write(input);

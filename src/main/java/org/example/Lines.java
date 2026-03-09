@@ -33,6 +33,12 @@ public class Lines {
                 .collect(Collectors.joining(""));
     }
 
+    public void clear() {
+       for(Cell cell: cells){
+           cell.update(' ', cell.foreGroundColor, cell.backgroundColor, cell.bold,cell.italic ,cell.underline);
+       }
+    }
+
     @Override
     public String toString() {
         return cells.toString();
