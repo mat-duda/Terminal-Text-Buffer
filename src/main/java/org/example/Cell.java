@@ -29,4 +29,11 @@ public class Cell {
 
         String style = TextColor.setColor(fg, bg, bold, italic, underline);
         return style + character + TextColor.RESET;
-    }}
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(character);
+
+    }
+}

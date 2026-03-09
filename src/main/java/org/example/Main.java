@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         TerminalBuffer buffer = new TerminalBuffer();
         buffer.setAttributes(1,6,true,false ,false);
-        buffer.setup(6,3,5);
+        buffer.setup(6,2,2);
 
 
         Scanner scanner = new Scanner(System.in);
@@ -14,7 +14,9 @@ public class Main {
 
         while (!input.equals("exit")) {
             buffer.print();
+            //buffer.refresh();
             input = scanner.nextLine().toLowerCase();
+
             if (input.equals("\u001B[A")) {
                 buffer.moveCursor(TerminalBuffer.Directions.UP, 1);
             } else if (input.equals("\u001B[B")) {

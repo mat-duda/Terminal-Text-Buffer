@@ -11,6 +11,7 @@ public class TerminalBuffer {
     private int height;
     private int maxScrollbackLines;
     private List<Lines> activeScreen = new ArrayList<>();
+    private List<Lines> inactiveScreen = new ArrayList<>();
     private int currentForegroundColor  ;
     private int currentBackgroundColor ;
     private boolean isBold = false;
@@ -18,6 +19,7 @@ public class TerminalBuffer {
     private boolean isUnderline = false;
     private int cursorX = 0;
     private int cursorY = 0;
+
     public int getWidth() {
         return width;
     }
@@ -44,7 +46,13 @@ public class TerminalBuffer {
     public int getCursorX() {
         return cursorX;
     }
-
+    private void pushLinesToInactiveScreen() {
+        Lines topLine = activeScreen.removeFirst();
+        inactiveScreen.add(topLine);
+        if(inactiveScreen.size() > maxScrollbackLines){
+            inactiveScreen.removeFirst();
+        }
+        activeScreen.add(new Lines(width, this.currentBackgroundColor));    }
     public int getCursorY() {
         return cursorY;
     }
@@ -75,14 +83,23 @@ public class TerminalBuffer {
         }
     }
     public void cursorForward() {
+        System.out.println(inactiveScreen.toString());
         if (cursorX < width - 1) {
             cursorX += 1;
-        } else if (cursorY < height - 1) {
+        } else {
             cursorX = 0;
-            cursorY += 1;
+            if (cursorY < height - 1) {
+                cursorY += 1;
+            } else {
+                    pushLinesToInactiveScreen();
+            }
         }
     }
+
     public void print(){
+        System.out.print("\033[H\033[2J");
+
+        System.out.flush();
         for (int y = 0; y < activeScreen.size(); y++) {
             Lines line = activeScreen.get(y);
             int highlightColumn = (y == cursorY) ? cursorX : -1;
