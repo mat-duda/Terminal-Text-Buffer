@@ -47,9 +47,22 @@ public class Main {
             } else if (input.startsWith("emptyinsert")) {
                 buffer.insertEmpty();
             }
+
+            else if (input.startsWith("getcharat")) {
+            String[] parts = input.split(" ");
+            int x = Integer.parseInt(parts[1]);
+            int y = Integer.parseInt(parts[2]);
+            System.out.println(buffer.getCharAt(x, y));
+            scanner.nextLine();
+            }
+            else if (input.startsWith("getattat")) {
+                String[] parts = input.split(" ");
+                int x = Integer.parseInt(parts[1]);
+                int y = Integer.parseInt(parts[2]);
+                System.out.println(buffer.getAttAt(x, y));
+                scanner.nextLine();
+            }
             //TODO: BELOW
-            else if (input.startsWith("getcharat")) {}
-            else if (input.startsWith("getattat")) {}
             else if (input.startsWith("getline")) {}
             else if (input.startsWith("getscreenandscroll")) {}
             else if (input.startsWith("getscreen")) {}

@@ -86,6 +86,30 @@ public class TerminalBuffer {
             cursorForward();
         }
     }
+    private Lines getLineFromTotalBuffer(int index) {
+        int scrollbackSize = inactiveScreen.size();
+        if (index < 0 || index >= scrollbackSize + height) {
+            throw new IndexOutOfBoundsException("Buffer index out of bounds");
+        }
+
+        if (index < scrollbackSize) {
+            return inactiveScreen.get(index);
+        } else {
+            return activeScreen.get(index - scrollbackSize);
+        }
+    }
+    public char getCharAt(int x, int y) {
+        Lines line = getLineFromTotalBuffer(y);
+        if (x < 0 || x >= width) return ' ';
+        return line.getCells().get(x).character;
+    }
+    public String getAttAt(int x, int y) {
+        Lines line = getLineFromTotalBuffer(y);
+        if (x < 0 || x >= width) return String.valueOf(' ');
+        Cell cell = line.getCells().get(x);
+        return String.format("FG: %d, BG: %d, Bold: %b, Italic: %b, Underline: %b",
+                cell.foreGroundColor, cell.backgroundColor, cell.bold, cell.italic, cell.underline);
+    }
     public void cursorForward() {
         if (cursorX < width - 1) {
             cursorX += 1;
