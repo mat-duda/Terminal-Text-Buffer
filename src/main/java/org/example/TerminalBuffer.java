@@ -227,4 +227,46 @@ public class TerminalBuffer {
         this.cursorX = Math.max(0, Math.min(x, width - 1));
         this.cursorY = Math.max(0, Math.min(y, height - 1));
     }
+    public void resize(int newWidth, int newHeight) {
+        int totalCellsBeforeCursor = (inactiveScreen.size() + cursorY) * width + cursorX;
+        List<Cell> allCells = new ArrayList<>();
+        for (Lines line : inactiveScreen) {
+            allCells.addAll(line.getCells());
+        }
+        for (Lines line : activeScreen) {
+            allCells.addAll(line.getCells());
+        }
+        this.width = newWidth;
+        this.height = newHeight;
+
+        List<Lines> allNewLines = new ArrayList<>();
+        for (int i = 0; i < allCells.size(); i += newWidth) {
+            Lines newLine = new Lines(newWidth, currentBackgroundColor);
+            newLine.getCells().clear();
+
+            for (int j = 0; j < newWidth; j++) {
+                if (i + j < allCells.size()) {
+                    newLine.getCells().add(allCells.get(i + j));
+                } else {
+                    newLine.getCells().add(new Cell(' ', currentForegroundColor, currentBackgroundColor, false, false, false));
+                }
+            }
+            allNewLines.add(newLine);
+        }
+
+        int screenStart = Math.max(0, allNewLines.size() - height);
+
+        this.activeScreen = new ArrayList<>(allNewLines.subList(screenStart, allNewLines.size()));
+        this.inactiveScreen = new ArrayList<>(allNewLines.subList(0, screenStart));
+
+        while (activeScreen.size() < height) {
+            activeScreen.add(new Lines(width, currentBackgroundColor));
+        }
+        this.cursorY = (totalCellsBeforeCursor / newWidth) - inactiveScreen.size();
+        this.cursorX = totalCellsBeforeCursor % newWidth;
+
+        this.cursorY = Math.max(0, Math.min(cursorY, height - 1));
+        this.cursorX = Math.max(0, Math.min(cursorX, width - 1));
+    }
+
 }
