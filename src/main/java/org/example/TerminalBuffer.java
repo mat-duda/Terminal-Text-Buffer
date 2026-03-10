@@ -122,6 +122,14 @@ public class TerminalBuffer {
         }
 
     }
+    public void insertEmpty() {
+        Lines shiftedLine = activeScreen.remove(0);
+        inactiveScreen.add(shiftedLine);
+        if (inactiveScreen.size() > maxScrollbackLines) {
+            inactiveScreen.remove(0);
+        }
+        activeScreen.add(new Lines(this.width, this.currentBackgroundColor));
+    }
     public void fillLine(char character){
         Lines lineToChange = activeScreen.get(cursorY);
 
@@ -149,9 +157,29 @@ public class TerminalBuffer {
         return inactiveScreen;
     }
 
-    public void insert(String text){
-        Lines currentLine = activeScreen.get(cursorY);
-            //currentLine.insertCell()
+    public void insert(String text) {
+        for (char c : text.toCharArray()) {
+            Lines currentLine = activeScreen.get(cursorY);
+
+            currentLine.insertCell(cursorX, new Cell(c, currentForegroundColor, currentBackgroundColor, isBold, isItalic, isUnderline));
+            if (currentLine.getCells().size() > width) {
+                Cell overflowCell = currentLine.getCells().remove(width);
+
+                int nextY = cursorY + 1;
+                if (nextY >= height) {
+                    pushLinesToInactiveScreen();
+                    nextY = height - 1;
+                }
+
+                activeScreen.get(nextY).getCells().add(0, overflowCell);
+
+                if (activeScreen.get(nextY).getCells().size() > width) {
+                    activeScreen.get(nextY).getCells().remove(width);
+                }
+            }
+
+            cursorForward();
+        }
     }
     public void setCursor(int x, int y) {
         this.cursorX = Math.max(0, Math.min(x, width - 1));

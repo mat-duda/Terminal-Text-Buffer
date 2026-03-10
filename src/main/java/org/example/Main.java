@@ -44,6 +44,8 @@ public class Main {
             else if (input.startsWith("clear")) {
                 for(Lines lines: buffer.getActiveScreen())
                     lines.clear();
+            } else if (input.startsWith("emptyinsert")) {
+                buffer.insertEmpty();
             }
             //TODO: BELOW
             else if (input.startsWith("getcharat")) {}

@@ -13,6 +13,7 @@ public class Cell {
         this.italic = i;
         this.underline = u;
     }
+
     public void update(char c, int fg, int bg, boolean b, boolean i, boolean u) {
         this.character = c;
         this.foreGroundColor = fg;

@@ -24,6 +24,11 @@ public class Lines {
     public Cell getCell(int i) {
         return cells.get(i);
     }
+    public void insertCell(int index, Cell newCell) {
+        if (index >= 0 && index <= cells.size()) {
+            cells.add(index, newCell);
+        }
+    }
 
     public String render(int cursorX) {
         return IntStream.range(0, cells.size())
