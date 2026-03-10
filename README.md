@@ -177,14 +177,7 @@ Replace it with a **Circular Buffer** implementation to support:
 ./gradlew build
 ```
 
----
-## Run the Project
 
-```bash
-./gradlew run
-```
-
----
 
 ## Run Unit Tests
 
