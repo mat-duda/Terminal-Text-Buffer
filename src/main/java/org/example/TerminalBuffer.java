@@ -10,16 +10,19 @@ public class TerminalBuffer {
     private int width;
     private int height;
     private int maxScrollback;
+    private Cursor cursor;
+    private Scrollback scrollback;
     private List<Lines> activeScreen = new ArrayList<>();
     private List<Lines> inactiveScreen = new ArrayList<>();
     private TextAttributes textAttributes = TextAttributes.defaultAttributes();
-    private int cursorX = 0;
-    private int cursorY = 0;
+
 
     public void setup(int width, int height, int maxScrollback) {
         this.width = width;
         this.height = height;
         this.maxScrollback = maxScrollback;
+        this.cursor = new Cursor(width, height);
+        this.scrollback = new Scrollback(maxScrollback);
         activeScreen.clear();
         for (int i = 0; i < height; i++) {
             activeScreen.add(new Lines(width, textAttributes));
@@ -50,12 +53,21 @@ public class TerminalBuffer {
             activeScreen.removeFirst();
         }
     }
-    public void write(String text){
+    private void scroll() {
+        scrollback.addLine(activeScreen.removeFirst());
+        activeScreen.add(new Lines(width, textAttributes));
+    }
+    public void write(String text) {
         for (char c : text.toCharArray()) {
-            Lines currentLine = activeScreen.get(cursorY);
-            Cell currentCell = currentLine.getCells().get(cursorX);
-            currentCell.update(c, textAttributes);
-            cursorForward();
+            activeScreen.get(cursor.getY()).getCells().get(cursor.getX()).update(c, textAttributes);
+
+            if (cursor.advance()) {
+                if (cursor.getY() < height - 1) {
+                    cursor.setCursor(0, cursor.getY() + 1);
+                } else {
+                    scroll();
+                }
+            }
         }
     }
     private Lines getLineFromTotalBuffer(int index) {
@@ -81,12 +93,12 @@ public class TerminalBuffer {
                 cell.foreGroundColor, cell.backgroundColor, cell.bold, cell.italic, cell.underline);
     }
     public void cursorForward() {
-        if (cursorX < width - 1) {
-            cursorX += 1;
+        if (cursor.getX() < width - 1) {
+            cursor.setX(cursor.getX()+1);
         } else {
-            cursorX = 0;
-            if (cursorY < height - 1) {
-                cursorY += 1;
+            cursor.setX(0);
+            if (cursor.getY() < height - 1) {
+                cursor.setY(cursor.getY()+1);
             } else {
                     pushLinesToInactiveScreen();
             }
@@ -100,22 +112,14 @@ public class TerminalBuffer {
         System.out.flush();
         for (int y = 0; y < activeScreen.size(); y++) {
             Lines line = activeScreen.get(y);
-            int highlightColumn = (y == cursorY) ? cursorX : -1;
+            int highlightColumn = (y == cursor.getY()) ? cursor.getX() : -1;
 
             System.out.println(line.render(highlightColumn )+TextColor.RESET);
 
         }
-        System.out.println(cursorX +" "+ cursorY );
+        System.out.println(cursor.getX() +" "+ cursor.getY() );
     }
-    public void moveCursor(Directions direction, int n){
-        switch (direction){
-            case UP -> cursorY = Math.max(0, cursorY - n);
-            case DOWN -> cursorY = Math.min(height - 1, cursorY + n);
-            case LEFT -> cursorX = Math.max(0, cursorX - n);
-            case RIGHT -> cursorX = Math.min(width - 1, cursorX + n);
-        }
 
-    }
     public void insertEmpty() {
         Lines shiftedLine = activeScreen.removeFirst();
         inactiveScreen.add(shiftedLine);
@@ -125,7 +129,7 @@ public class TerminalBuffer {
         activeScreen.add(new Lines(this.width, this.textAttributes));
     }
     public void fillLine(char character){
-        Lines lineToChange = activeScreen.get(cursorY);
+        Lines lineToChange = activeScreen.get(cursor.getY());
 
         for (Cell cell : lineToChange.getCells()) {
             cell.update(character, textAttributes);
@@ -140,18 +144,16 @@ public class TerminalBuffer {
             line.clear();
         }
         inactiveScreen.clear();
-        cursorX = 0;
-        cursorY = 0;
     }
     public void insert(String text) {
         for (char c : text.toCharArray()) {
-            Lines currentLine = activeScreen.get(cursorY);
+            Lines currentLine = activeScreen.get(cursor.getY());
 
-            currentLine.insertCell(cursorX, new Cell(c, textAttributes));
+            currentLine.insertCell(cursor.getX(), new Cell(c, textAttributes));
             if (currentLine.getCells().size() > width) {
                 Cell overflowCell = currentLine.getCells().remove(width);
 
-                int nextY = cursorY + 1;
+                int nextY = cursor.getY() + 1;
                 if (nextY >= height) {
                     pushLinesToInactiveScreen();
                     nextY = height - 1;
@@ -187,50 +189,23 @@ public class TerminalBuffer {
         }
         return sb.toString();
     }
-    public void setCursor(int x, int y) {
-        this.cursorX = Math.max(0, Math.min(x, width - 1));
-        this.cursorY = Math.max(0, Math.min(y, height - 1));
-    }
+
     public void resize(int newWidth, int newHeight) {
-        int totalCellsBeforeCursor = (inactiveScreen.size() + cursorY) * width + cursorX;
-        List<Cell> allCells = new ArrayList<>();
-        for (Lines line : inactiveScreen) {
-            allCells.addAll(line.getCells());
-        }
-        for (Lines line : activeScreen) {
-            allCells.addAll(line.getCells());
-        }
+        ResizeEngine.ResizeResult result = ResizeEngine.reflow(inactiveScreen, activeScreen, this.width,
+                newWidth, newHeight, cursor.getX(), cursor.getY(), textAttributes);
+
         this.width = newWidth;
         this.height = newHeight;
-
-        List<Lines> allNewLines = new ArrayList<>();
-        for (int i = 0; i < allCells.size(); i += newWidth) {
-            Lines newLine = new Lines(newWidth, textAttributes);
-            newLine.getCells().clear();
-
-            for (int j = 0; j < newWidth; j++) {
-                if (i + j < allCells.size()) {
-                    newLine.getCells().add(allCells.get(i + j));
-                } else {
-                    newLine.getCells().add(new Cell(' ', textAttributes));
-                }
-            }
-            allNewLines.add(newLine);
-        }
-
-        int screenStart = Math.max(0, allNewLines.size() - height);
-
-        this.activeScreen = new ArrayList<>(allNewLines.subList(screenStart, allNewLines.size()));
-        this.inactiveScreen = new ArrayList<>(allNewLines.subList(0, screenStart));
-
-        while (activeScreen.size() < height) {
-            activeScreen.add(new Lines(width, textAttributes));
-        }
-        this.cursorY = (totalCellsBeforeCursor / newWidth) - inactiveScreen.size();
-        this.cursorX = totalCellsBeforeCursor % newWidth;
-
-        this.cursorY = Math.max(0, Math.min(cursorY, height - 1));
-        this.cursorX = Math.max(0, Math.min(cursorX, width - 1));
+        this.inactiveScreen = result.inactive;
+        this.activeScreen = result.active;
+        this.cursor.setX(result.cursorX);
+        this.cursor.setY(result.cursorY);
+    }
+    public void setCursor(int x, int y) {
+        cursor.setCursor(x, y);
     }
 
+    public void moveCursor(Directions direction, int n) {
+        cursor.moveCursor(direction, n);
+    }
 }

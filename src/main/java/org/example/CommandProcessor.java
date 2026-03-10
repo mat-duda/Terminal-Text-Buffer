@@ -10,78 +10,72 @@ public class CommandProcessor {
         this.buffer = buffer;
         this.scanner = scanner;
     }
-    public void execute(String input){
-            if (input.startsWith("goto")) {
-                String[] parts = input.split(" ");
-                int x = Integer.parseInt(parts[1]);
-                int y = Integer.parseInt(parts[2]);
-                buffer.setCursor(x, y);
-            } else if (input.startsWith("move")) {
-                String[] parts = input.split(" ");
-                TerminalBuffer.Directions dir = TerminalBuffer.Directions.valueOf(parts[1].toUpperCase());
-                int n = Integer.parseInt(parts[2]);
-                buffer.moveCursor(dir, n);
-            }
-            else if (input.startsWith("fill")) {
-                char character = input.split(" ")[1].charAt(0);
-                buffer.fillLine(character);
-            }
-            else if (input.startsWith("insert")) {
-                String text = input.substring(7);
-                buffer.insert(text);
-            }
-            else if (input.startsWith("clearall")) {
 
-                buffer.clearAll();
+    public void execute(String input) {
+        if (input.isBlank()) return;
+        String[] parts = input.split(" ");
+        String command = parts[0].toLowerCase();
 
-            }
-            else if (input.startsWith("clear")) {
-                for(Lines lines: buffer.getActiveScreen())
-                    lines.clear();
-            } else if (input.startsWith("emptyinsert")) {
-                buffer.insertEmpty();
-            }
+        try {
+            switch (command) {
+                case "goto" -> buffer.setCursor(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
 
-            else if (input.startsWith("getcharat")) {
-                String[] parts = input.split(" ");
-                int x = Integer.parseInt(parts[1]);
-                int y = Integer.parseInt(parts[2]);
-                System.out.println(buffer.getCharAt(x, y));
-                scanner.nextLine();
+                case "move" -> {
+                    TerminalBuffer.Directions dir = TerminalBuffer.Directions.valueOf(parts[1].toUpperCase());
+                    buffer.moveCursor(dir, Integer.parseInt(parts[2]));
+                }
+                case "fill" -> buffer.fillLine(parts[1].charAt(0));
+
+                case "insert" -> buffer.insert(input.substring(7));
+
+                case "clearall" -> buffer.clearAll();
+
+                case "clear" -> {
+                    for (Lines line : buffer.getActiveScreen()) {
+                        line.clear();
+                    }
+                }
+
+                case "emptyinsert" -> buffer.insertEmpty();
+
+                case "getcharat" -> {
+                    System.out.println("Char: [" + buffer.getCharAt(Integer.parseInt(parts[1]), Integer.parseInt(parts[2])) + "]");
+                    waitForUser();
+                }
+
+                case "getattat" -> {
+                    System.out.println("Attributes: " + buffer.getAttAt(Integer.parseInt(parts[1]), Integer.parseInt(parts[2])));
+                    waitForUser();
+                }
+
+                case "getline" -> {
+                    System.out.println("Line " + parts[1] + ": " + buffer.getLine(Integer.parseInt(parts[1])));
+                    waitForUser();
+                }
+
+                case "getscreenandscroll" -> {
+                    System.out.println("--- FULL CONTENT ---");
+                    System.out.println(buffer.getScreenAndScroll());
+                    waitForUser();
+                }
+
+                case "getscreen" -> {
+                    System.out.println("--- SCREEN CONTENT ---");
+                    System.out.println(buffer.getScreen());
+                    waitForUser();
+                }
+
+                case "resize" -> buffer.resize(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                default -> buffer.write(input);
             }
-            else if (input.startsWith("getattat")) {
-                String[] parts = input.split(" ");
-                int x = Integer.parseInt(parts[1]);
-                int y = Integer.parseInt(parts[2]);
-                System.out.println(buffer.getAttAt(x, y));
-                scanner.nextLine();
-            }
-            else if (input.startsWith("getline")) {
-                String[] parts = input.split(" ");
-                int y = Integer.parseInt(parts[1]);
-                System.out.println(buffer.getLine(y));
-                scanner.nextLine();
-            }
-            else if (input.startsWith("getscreenandscroll")) {
-                System.out.println("SCREEN AND SCROLL CONTENT");
-                System.out.println(buffer.getScreenAndScroll());
-                scanner.nextLine();
-            }
-            else if (input.startsWith("getscreen")) {
-                System.out.println("SCREEN");
-                System.out.println(buffer.getScreen());
-                scanner.nextLine();
-            }
-            else if (input.startsWith("resize")) {
-                String[] parts = input.split(" ");
-                int x = Integer.parseInt(parts[1]);
-                int y = Integer.parseInt(parts[2]);
-                buffer.resize(x,y);
-            }
-            else {
-                buffer.write(input);
-            }
+        } catch (Exception e) {
+            System.err.println("Error executing command '" + command + "': " + e.getMessage());
+            waitForUser();
         }
-
     }
 
+    private void waitForUser() {
+        System.out.println("\nPress Enter to continue...");
+        scanner.nextLine();
+    }
+}
