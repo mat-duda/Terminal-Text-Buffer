@@ -5,24 +5,23 @@ public class Cell {
     int foreGroundColor;
     int backgroundColor;
     boolean bold, italic, underline;
-    public Cell(char character, int foreGroundColor, int backgroundColor, boolean b, boolean i, boolean u) {
+    public Cell(char character, TextAttributes attrs) {
         this.character = character;
-        this.foreGroundColor = foreGroundColor;
-        this.backgroundColor = backgroundColor;
-        this.bold = b;
-        this.italic = i;
-        this.underline = u;
+        this.foreGroundColor = attrs.foregroundColor();
+        this.backgroundColor = attrs.backgroundColor();
+        this.bold = attrs.isBold();
+        this.italic = attrs.isItalic();
+        this.underline = attrs.isUnderline();
     }
 
-    public void update(char c, int fg, int bg, boolean b, boolean i, boolean u) {
+    public void update(char c, TextAttributes attrs) {
         this.character = c;
-        this.foreGroundColor = fg;
-        this.backgroundColor = bg;
-        this.bold = b;
-        this.italic = i;
-        this.underline = u;
+        this.foreGroundColor = attrs.foregroundColor();
+        this.backgroundColor = attrs.backgroundColor();
+        this.bold = attrs.isBold();
+        this.italic = attrs.isItalic();
+        this.underline = attrs.isUnderline();
     }
-
 
     public String render(boolean isCursor) {
         int fg = isCursor ? backgroundColor : foreGroundColor;

@@ -6,14 +6,13 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class Lines {
-    private int width;
-    private List<Cell> cells;
-
-    public Lines(int width, int defaultBackgroundColor) {
-        this.width = width;
+    private final List<Cell> cells;
+    private TextAttributes attributes;
+    public Lines(int width, TextAttributes attributes) {
+        this.attributes = attributes;
         this.cells = new ArrayList<>(width);
         for (int i = 0; i < width; i++) {
-            cells.add(new Cell(' ',7,defaultBackgroundColor,false,false,false));
+            cells.add(new Cell(' ',attributes));
         }
     }
 
@@ -21,9 +20,6 @@ public class Lines {
         return cells;
     }
 
-    public Cell getCell(int i) {
-        return cells.get(i);
-    }
     public void insertCell(int index, Cell newCell) {
         if (index >= 0 && index <= cells.size()) {
             cells.add(index, newCell);
@@ -32,15 +28,13 @@ public class Lines {
 
     public String render(int cursorX) {
         return IntStream.range(0, cells.size())
-                .mapToObj(i -> {
-                    return cells.get(i).render(i == cursorX);
-                })
+                .mapToObj(i -> cells.get(i).render(i == cursorX))
                 .collect(Collectors.joining(""));
     }
 
     public void clear() {
        for(Cell cell: cells){
-           cell.update(' ', cell.foreGroundColor, cell.backgroundColor, cell.bold,cell.italic ,cell.underline);
+           cell.update(' ', attributes);
        }
     }
 

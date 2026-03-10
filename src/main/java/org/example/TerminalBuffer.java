@@ -9,64 +9,36 @@ public class TerminalBuffer {
     }
     private int width;
     private int height;
-    private int maxScrollbackLines;
+    private int maxScrollback;
     private List<Lines> activeScreen = new ArrayList<>();
     private List<Lines> inactiveScreen = new ArrayList<>();
-    private int currentForegroundColor  ;
-    private int currentBackgroundColor ;
-    private boolean isBold = false;
-    private boolean isItalic = false;
-    private boolean isUnderline = false;
+    private TextAttributes textAttributes = TextAttributes.defaultAttributes();
     private int cursorX = 0;
     private int cursorY = 0;
 
-    public int getWidth() {
-        return width;
-    }
-    public void setAttributes(int fg, int bg, boolean bold, boolean italic, boolean underline) {
-        this.currentForegroundColor = fg;
-        this.currentBackgroundColor = bg;
-        this.isBold = bold;
-        this.isItalic = italic;
-        this.isUnderline = underline;
-    }
-    public void  setup(int width, int height, int maxScrollbackLines){
+    public void setup(int width, int height, int maxScrollback) {
         this.width = width;
         this.height = height;
-        this.maxScrollbackLines = maxScrollbackLines;
-        this.activeScreen = new ArrayList<>(height);
-
-        for(int i = 0; i < height; i++){
-            activeScreen.add(new Lines(width,this.currentBackgroundColor));
-
+        this.maxScrollback = maxScrollback;
+        activeScreen.clear();
+        for (int i = 0; i < height; i++) {
+            activeScreen.add(new Lines(width, textAttributes));
         }
-
+    }
+    public void setAttributes(int fg, int bg, boolean bold, boolean italic, boolean underline) {
+        this.textAttributes = new TextAttributes(fg, bg, bold, italic, underline);
     }
 
-    public int getCursorX() {
-        return cursorX;
-    }
     private void pushLinesToInactiveScreen() {
         if (activeScreen.isEmpty()) return;
 
-        Lines topLine = activeScreen.remove(0);
+        Lines topLine = activeScreen.removeFirst();
         inactiveScreen.add(topLine);
 
-        if (inactiveScreen.size() > maxScrollbackLines) {
-            inactiveScreen.remove(0);
+        if (inactiveScreen.size() > maxScrollback) {
+            inactiveScreen.removeFirst();
         }
-        activeScreen.add(new Lines(width, this.currentBackgroundColor));
-    }
-    public int getCursorY() {
-        return cursorY;
-    }
-
-    public void setCurrentForegroundColor(int currentForegroundColor) {
-        this.currentForegroundColor = currentForegroundColor;
-    }
-
-    public void setCurrentBackgroundColor(int currentBackgroundColor) {
-        this.currentBackgroundColor = currentBackgroundColor;
+        activeScreen.add(new Lines(width, textAttributes));
     }
 
     public List<Lines> getActiveScreen() {
@@ -74,15 +46,15 @@ public class TerminalBuffer {
     }
     public void add(Lines line){
         activeScreen.add(line);
-        if(activeScreen.size() > maxScrollbackLines){
-            activeScreen.remove(0);
+        if(activeScreen.size() > maxScrollback){
+            activeScreen.removeFirst();
         }
     }
     public void write(String text){
         for (char c : text.toCharArray()) {
             Lines currentLine = activeScreen.get(cursorY);
             Cell currentCell = currentLine.getCells().get(cursorX);
-            currentCell.update(c, currentForegroundColor, currentBackgroundColor, isBold, isItalic, isUnderline);
+            currentCell.update(c, textAttributes);
             cursorForward();
         }
     }
@@ -145,18 +117,18 @@ public class TerminalBuffer {
 
     }
     public void insertEmpty() {
-        Lines shiftedLine = activeScreen.remove(0);
+        Lines shiftedLine = activeScreen.removeFirst();
         inactiveScreen.add(shiftedLine);
-        if (inactiveScreen.size() > maxScrollbackLines) {
-            inactiveScreen.remove(0);
+        if (inactiveScreen.size() > maxScrollback) {
+            inactiveScreen.removeFirst();
         }
-        activeScreen.add(new Lines(this.width, this.currentBackgroundColor));
+        activeScreen.add(new Lines(this.width, this.textAttributes));
     }
     public void fillLine(char character){
         Lines lineToChange = activeScreen.get(cursorY);
 
         for (Cell cell : lineToChange.getCells()) {
-            cell.update(character, currentForegroundColor, currentBackgroundColor, isBold, isItalic, isUnderline);
+            cell.update(character, textAttributes);
         }
     }
 
@@ -171,19 +143,11 @@ public class TerminalBuffer {
         cursorX = 0;
         cursorY = 0;
     }
-    public int getCurrentBackgroundColor() {
-        return currentBackgroundColor;
-    }
-
-    public List<Lines> getInactiveScreen() {
-        return inactiveScreen;
-    }
-
     public void insert(String text) {
         for (char c : text.toCharArray()) {
             Lines currentLine = activeScreen.get(cursorY);
 
-            currentLine.insertCell(cursorX, new Cell(c, currentForegroundColor, currentBackgroundColor, isBold, isItalic, isUnderline));
+            currentLine.insertCell(cursorX, new Cell(c, textAttributes));
             if (currentLine.getCells().size() > width) {
                 Cell overflowCell = currentLine.getCells().remove(width);
 
@@ -193,7 +157,7 @@ public class TerminalBuffer {
                     nextY = height - 1;
                 }
 
-                activeScreen.get(nextY).getCells().add(0, overflowCell);
+                activeScreen.get(nextY).getCells().addFirst(overflowCell);
 
                 if (activeScreen.get(nextY).getCells().size() > width) {
                     activeScreen.get(nextY).getCells().remove(width);
@@ -241,14 +205,14 @@ public class TerminalBuffer {
 
         List<Lines> allNewLines = new ArrayList<>();
         for (int i = 0; i < allCells.size(); i += newWidth) {
-            Lines newLine = new Lines(newWidth, currentBackgroundColor);
+            Lines newLine = new Lines(newWidth, textAttributes);
             newLine.getCells().clear();
 
             for (int j = 0; j < newWidth; j++) {
                 if (i + j < allCells.size()) {
                     newLine.getCells().add(allCells.get(i + j));
                 } else {
-                    newLine.getCells().add(new Cell(' ', currentForegroundColor, currentBackgroundColor, false, false, false));
+                    newLine.getCells().add(new Cell(' ', textAttributes));
                 }
             }
             allNewLines.add(newLine);
@@ -260,7 +224,7 @@ public class TerminalBuffer {
         this.inactiveScreen = new ArrayList<>(allNewLines.subList(0, screenStart));
 
         while (activeScreen.size() < height) {
-            activeScreen.add(new Lines(width, currentBackgroundColor));
+            activeScreen.add(new Lines(width, textAttributes));
         }
         this.cursorY = (totalCellsBeforeCursor / newWidth) - inactiveScreen.size();
         this.cursorX = totalCellsBeforeCursor % newWidth;
