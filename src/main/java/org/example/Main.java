@@ -62,11 +62,22 @@ public class Main {
                 System.out.println(buffer.getAttAt(x, y));
                 scanner.nextLine();
             }
-            //TODO: BELOW
-            else if (input.startsWith("getline")) {}
-            else if (input.startsWith("getscreenandscroll")) {}
-            else if (input.startsWith("getscreen")) {}
-            //---------------------
+            else if (input.startsWith("getline")) {
+                String[] parts = input.split(" ");
+                int y = Integer.parseInt(parts[1]);
+                System.out.println(buffer.getLine(y));
+                scanner.nextLine();
+            }
+            else if (input.startsWith("getscreenandscroll")) {
+                System.out.println("SCREEN AND SCROLL CONTENT");
+                System.out.println(buffer.getScreenAndScroll());
+                scanner.nextLine();
+            }
+            else if (input.startsWith("getscreen")) {
+                System.out.println("SCREEN");
+                System.out.println(buffer.getScreen());
+                scanner.nextLine();
+            }
             else {
                 buffer.write(input);
             }

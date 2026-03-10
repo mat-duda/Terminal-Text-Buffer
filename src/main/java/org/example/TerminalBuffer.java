@@ -99,9 +99,7 @@ public class TerminalBuffer {
         }
     }
     public char getCharAt(int x, int y) {
-        Lines line = getLineFromTotalBuffer(y);
-        if (x < 0 || x >= width) return ' ';
-        return line.getCells().get(x).character;
+        return getLineFromTotalBuffer(y).getCells().get(x).character;
     }
     public String getAttAt(int x, int y) {
         Lines line = getLineFromTotalBuffer(y);
@@ -204,6 +202,26 @@ public class TerminalBuffer {
 
             cursorForward();
         }
+    }
+    public String getLine(int y) {
+        return getLineFromTotalBuffer(y).toString();
+    }
+    public String getScreenAndScroll(){
+        StringBuilder sb = new StringBuilder();
+        for (Lines line : inactiveScreen) {
+            sb.append(line.toString()).append("\n");
+        }
+        for (Lines line : activeScreen) {
+            sb.append(line.toString()).append("\n");
+        }
+        return sb.toString();
+    }
+    public String getScreen(){
+        StringBuilder sb = new StringBuilder();
+        for (Lines line : activeScreen) {
+            sb.append(line.toString()).append("\n");
+        }
+        return sb.toString();
     }
     public void setCursor(int x, int y) {
         this.cursorX = Math.max(0, Math.min(x, width - 1));
