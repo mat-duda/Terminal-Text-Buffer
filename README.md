@@ -178,6 +178,13 @@ Replace it with a **Circular Buffer** implementation to support:
 ```
 
 ---
+## Run the Project
+
+```bash
+./gradlew run
+```
+
+---
 
 ## Run Unit Tests
 
