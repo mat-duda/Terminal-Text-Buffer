@@ -2,7 +2,6 @@ package org.example;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class TerminalBuffer {
     public enum Directions{
         UP,DOWN,LEFT,RIGHT
@@ -11,7 +10,6 @@ public class TerminalBuffer {
     private int height;
     private int maxScrollback;
     private Cursor cursor;
-    private Scrollback scrollback;
     private List<Lines> activeScreen = new ArrayList<>();
     private List<Lines> inactiveScreen = new ArrayList<>();
     private TextAttributes textAttributes = TextAttributes.defaultAttributes();
@@ -22,7 +20,6 @@ public class TerminalBuffer {
         this.height = height;
         this.maxScrollback = maxScrollback;
         this.cursor = new Cursor(width, height);
-        this.scrollback = new Scrollback(maxScrollback);
         activeScreen.clear();
         for (int i = 0; i < height; i++) {
             activeScreen.add(new Lines(width, textAttributes));
@@ -54,16 +51,21 @@ public class TerminalBuffer {
         }
     }
     private void scroll() {
-        scrollback.addLine(activeScreen.removeFirst());
+        Lines topLine = activeScreen.removeFirst();
+        inactiveScreen.add(topLine);
+        if (inactiveScreen.size() > maxScrollback) {
+            inactiveScreen.removeFirst();
+        }
         activeScreen.add(new Lines(width, textAttributes));
     }
     public void write(String text) {
         for (char c : text.toCharArray()) {
             activeScreen.get(cursor.getY()).getCells().get(cursor.getX()).update(c, textAttributes);
-
-            if (cursor.advance()) {
+            cursor.setX(cursor.getX() + 1);
+            if (cursor.getX() >= width) {
+                cursor.setX(0);
                 if (cursor.getY() < height - 1) {
-                    cursor.setCursor(0, cursor.getY() + 1);
+                    cursor.setY(cursor.getY() + 1);
                 } else {
                     scroll();
                 }
@@ -105,19 +107,27 @@ public class TerminalBuffer {
         }
     }
 
-    public void print(){
-        System.out.println(inactiveScreen.toString());
+    public void print() {
         System.out.print("\033[H\033[2J");
-
         System.out.flush();
+
+        for (Lines line : inactiveScreen) {
+            System.out.println(TextColor.GREY + line.render(-1) + TextColor.RESET);
+        }
+
+        if (!inactiveScreen.isEmpty()) {
+            System.out.println(TextColor.GREY + "--- Scrollback Above ---" + TextColor.RESET);
+        }
+
         for (int y = 0; y < activeScreen.size(); y++) {
             Lines line = activeScreen.get(y);
             int highlightColumn = (y == cursor.getY()) ? cursor.getX() : -1;
 
-            System.out.println(line.render(highlightColumn )+TextColor.RESET);
-
+            System.out.println(line.render(highlightColumn) + TextColor.RESET);
         }
-        System.out.println(cursor.getX() +" "+ cursor.getY() );
+
+        System.out.println("\nCursor: [" + cursor.getX() + ", " + cursor.getY() + "] | " +
+                "History: " + inactiveScreen.size() + "/" + maxScrollback);
     }
 
     public void insertEmpty() {

@@ -5,8 +5,8 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         TerminalBuffer buffer = new TerminalBuffer();
-        buffer.setAttributes(1, 3, false, true, false);
-        buffer.setup(5,2,2);
+        buffer.setAttributes(6, 0, false, true, false);
+        buffer.setup(5,5,2);
 
         Scanner scanner = new Scanner(System.in);
         CommandProcessor processor = new CommandProcessor(buffer,scanner );

@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 
 public class Lines {
     private final List<Cell> cells;
-    private TextAttributes attributes;
+    private final TextAttributes attributes;
     public Lines(int width, TextAttributes attributes) {
         this.attributes = attributes;
         this.cells = new ArrayList<>(width);
@@ -40,6 +40,10 @@ public class Lines {
 
     @Override
     public String toString() {
-        return cells.toString();
+        StringBuilder sb = new StringBuilder();
+        for (Cell cell : cells) {
+            sb.append(cell.character);
+        }
+        return sb.toString();
     }
 }

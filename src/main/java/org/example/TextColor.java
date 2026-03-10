@@ -2,7 +2,7 @@ package org.example;
 
 public class TextColor {
     public static final String RESET = "\u001B[0m";
-
+    public static final String GREY = "\u001B[90m";
     public static String setColor(int foregroundColor, int backgroundColor, boolean bold, boolean italic, boolean underlined) {
         String base = "\u001B[";
         StringBuilder sb = new StringBuilder(base);
